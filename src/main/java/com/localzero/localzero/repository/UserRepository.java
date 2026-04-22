@@ -1,4 +1,4 @@
 package com.localzero.localzero.repository;
 
-public class UserRepository {
+public interface UserRepository {
 }
