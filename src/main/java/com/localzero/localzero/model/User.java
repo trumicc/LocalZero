@@ -1,7 +1,6 @@
 package com.localzero.localzero.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
