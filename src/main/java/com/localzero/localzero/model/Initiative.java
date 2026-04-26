@@ -32,5 +32,6 @@ public class Initiative {
     private Visibility visibility;
     @ManyToMany
     private List<User> participants = new ArrayList<>();
-
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Update> updates = new ArrayList<>();
 }
