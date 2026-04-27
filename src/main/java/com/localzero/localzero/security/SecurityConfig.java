@@ -17,13 +17,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.requestMatchers ("/api/auth/register", "/api/auth/login", "/login", "/register").permitAll()
-                        .anyRequest().authenticated()
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
                 )
-                        .sessionManagement(session -> session
-                                .maximumSessions(10)
-                        );
+                .sessionManagement(session -> session
+                        .maximumSessions(10)
+                );
         return http.build();
     }
 

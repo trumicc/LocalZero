@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LocalZero</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="brand">Local<span>Zero</span></div>
+    <div class="nav-right">
+        <span class="nav-username" id="nav-username">Loading...</span>
+        <button class="btn-outline" onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <!-- Create Initiative -->
+        <div class="card">
+            <div class="card-title">New Initiative</div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="f-title" placeholder="e.g. Community Garden" />
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="f-desc" placeholder="What's this initiative about?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="f-category">
+                    <option value="">Select category</option>
+                    <option value="gardening">Gardening</option>
+                    <option value="tool_sharing">Tool Sharing</option>
+                    <option value="energy">Energy</option>
+                    <option value="transport">Transport</option>
+                    <option value="waste">Waste</option>
+                    <option value="education">Education</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" id="f-location" placeholder="e.g. Möllevången park" />
+            </div>
+            <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" id="f-date" />
+            </div>
+            <button class="btn-primary" onclick="createInitiative()">Create Initiative</button>
+        </div>
+
+        <!-- Filter -->
+        <div class="card">
+            <div class="card-title">Filter by Category</div>
+            <div class="filter-tags" id="filter-tags">
+                <span class="tag active" data-cat="">All</span>
+                <span class="tag" data-cat="gardening">Gardening</span>
+                <span class="tag" data-cat="tool_sharing">Tool Sharing</span>
+                <span class="tag" data-cat="energy">Energy</span>
+                <span class="tag" data-cat="transport">Transport</span>
+                <span class="tag" data-cat="waste">Waste</span>
+                <span class="tag" data-cat="education">Education</span>
+                <span class="tag" data-cat="other">Other</span>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- FEED -->
+    <main>
+        <div class="feed-header">
+            <div class="feed-title">Initiatives</div>
+            <div class="feed-count" id="feed-count"></div>
+        </div>
+        <div class="initiatives-list" id="initiatives-list">
+            <div class="skeleton-card">
+                <div class="skeleton skeleton-line title"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line short"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton skeleton-line title" style="width:50%"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line short" style="width:30%"></div>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<div id="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>

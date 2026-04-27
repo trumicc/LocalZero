@@ -2,6 +2,7 @@ package com.localzero.localzero.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "users")
@@ -9,17 +10,24 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false, unique = true)
     private String email;
+
+    @JsonProperty("password")
     @Column(nullable = false)
     private String passwordHash;
+
     @Column (nullable = false)
     private String location;
+
     @Column(nullable = false)
     private  String roles;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -34,8 +42,8 @@ public class User {
         this.roles = roles;
         this.createdAt = LocalDateTime.now();
     }
-    public long getId() {return id;}
-    public void setId(long id) {this.id = id;}
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
     public String getName() {return name;}
     public void setName(String name) {this.name = name;}
     public String getEmail() {return email;}
