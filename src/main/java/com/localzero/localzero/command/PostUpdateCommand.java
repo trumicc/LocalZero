@@ -8,6 +8,10 @@ public class PostUpdateCommand implements ActionCommand {
     private Initiative initiative;
     private Update update;
 
+    public PostUpdateCommand(Initiative initiative, Update update) {
+        this.initiative = initiative;
+        this.update = update;
+    }
     @Override
     public void execute() {
         initiative.getUpdates().add(update);
