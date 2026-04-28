@@ -61,5 +61,4 @@ public class ParticipationService {
         actionCommand.execute();
         updateRepository.save(update);
     }
-
 }
