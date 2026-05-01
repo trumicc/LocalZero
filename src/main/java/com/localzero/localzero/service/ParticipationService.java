@@ -18,46 +18,45 @@ public class ParticipationService {
     private CommentRepository commentRepository;
     private UpdateRepository updateRepository;
 
-    public ParticipationService(UserRepository ur, InitiativeRepository ir, CommentRepository cr,UpdateRepository upr) {
+    public ParticipationService(UserRepository ur, InitiativeRepository ir, CommentRepository cr, UpdateRepository upr) {
         this.userRepository = ur;
         this.initiativeRepository = ir;
         this.commentRepository = cr;
         this.updateRepository = upr;
     }
 
-    //Join
-    public void join(int userId,int initiativeId) {
+    public void join(Long userId, int initiativeId) {
         User user = userRepository.findById(userId).orElseThrow();
         Initiative initiative = initiativeRepository.findById(initiativeId).orElseThrow();
-        ActionCommand actionCommand= new JoinInitiative(initiative,user);
+        ActionCommand actionCommand = new JoinInitiative(initiative, user);
         actionCommand.execute();
     }
-    //post update
-    public void postUpdate(int userId, String updateContent, int initiativeId) {
+
+    public void postUpdate(Long userId, String updateContent, int initiativeId) {
         User user = userRepository.findById(userId).orElseThrow();
         Initiative initiative = initiativeRepository.findById(initiativeId).orElseThrow();
-        Update update= new Update();
+        Update update = new Update();
         update.setContent(updateContent);
-        ActionCommand actionCommand= new PostUpdateCommand(initiative,update);
+        ActionCommand actionCommand = new PostUpdateCommand(initiative, update);
         actionCommand.execute();
     }
-    // comment update
-    public void comment(String commentContent, int updateId, int userId) {
+
+    public void comment(String commentContent, int updateId, Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
-        Update update= updateRepository.findById(updateId).orElseThrow();
+        Update update = updateRepository.findById(updateId).orElseThrow();
         Comment comment = new Comment();
         comment.setContent(commentContent);
         comment.setAuthor(user);
         commentRepository.save(comment);
-        ActionCommand actionCommand= new CommentUpdateCommand(update,comment);
+        ActionCommand actionCommand = new CommentUpdateCommand(update, comment);
         actionCommand.execute();
         updateRepository.save(update);
     }
-    //Like update
-    public void like(int updateId, int userId) {
+
+    public void like(int updateId, Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
-        Update update= updateRepository.findById(updateId).orElseThrow();
-        ActionCommand actionCommand= new LikeUpdateCommand(update,user);
+        Update update = updateRepository.findById(updateId).orElseThrow();
+        ActionCommand actionCommand = new LikeUpdateCommand(update, user);
         actionCommand.execute();
         updateRepository.save(update);
     }
