@@ -2,5 +2,5 @@ package com.localzero.localzero.model;
 
 public enum Role {
     RESIDENT,
-    ORGANIZER
+    COMMUNITY_ORGANIZER
 }

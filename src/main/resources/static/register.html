@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — LocalZero</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="auth-body">
+
+<div class="auth-left">
+    <div class="brand">Local<span>Zero</span></div>
+    <div class="hero-text">
+        <h2>Join your neighborhood.</h2>
+        <p>Connect with residents around you and make a real difference through local sustainability initiatives.</p>
+    </div>
+    <div class="features">
+        <div class="feature"><div class="feature-dot"></div>Create and join local initiatives</div>
+        <div class="feature"><div class="feature-dot"></div>Track your carbon savings</div>
+        <div class="feature"><div class="feature-dot"></div>Connect with neighbors</div>
+        <div class="feature"><div class="feature-dot"></div>Share updates and ideas</div>
+    </div>
+</div>
+
+<div class="auth-right">
+    <div class="form-card">
+        <h1>Create account</h1>
+        <p class="subtitle">Already have one? <a href="/login">Sign in here</a></p>
+
+        <div class="alert" id="alert"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Full name</label>
+                <input type="text" id="name" placeholder="e.g. Muhamed Trumic" required />
+                <div class="error-msg" id="nameErr">Please enter your full name</div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="you@mail.com" required />
+                <div class="error-msg" id="emailErr">Please enter a valid email</div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="At least 6 characters" required />
+                <div class="error-msg" id="passErr">Password must be at least 6 characters</div>
+            </div>
+            <div class="form-group">
+                <label for="location">Neighborhood / City</label>
+                <input type="text" id="location" placeholder="e.g. Malmö, Möllevången" required />
+                <div class="error-msg" id="locErr">Please enter your neighborhood</div>
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role">
+                    <option value="resident">Resident</option>
+                    <option value="community_organizer">Community Organizer</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary" id="submitBtn">Create account</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const form  = document.getElementById('registerForm');
+    const alert = document.getElementById('alert');
+    const btn   = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alert.className = 'alert';
+
+        const name     = document.getElementById('name').value.trim();
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const location = document.getElementById('location').value.trim();
+        const role     = document.getElementById('role').value;
+
+        let valid = true;
+        if (!name)               { showErr('nameErr', 'name'); valid = false; }
+        if (!email)              { showErr('emailErr', 'email'); valid = false; }
+        if (password.length < 6) { showErr('passErr', 'password'); valid = false; }
+        if (!location)           { showErr('locErr', 'location'); valid = false; }
+        if (!valid) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Creating account...';
+
+        try {
+            const res  = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    location,
+                    roles: role === "community_organizer" ? ["COMMUNITY_ORGANIZER"] : ["RESIDENT"]
+                })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert.className = 'alert success';
+                alert.textContent = 'Account created! Redirecting to login...';
+                setTimeout(() => window.location.href = '/login', 1500);
+            } else {
+                alert.className = 'alert error';
+                alert.textContent = data.error || 'Registration failed';
+                btn.disabled = false;
+                btn.textContent = 'Create account';
+            }
+        } catch {
+            alert.className = 'alert error';
+            alert.textContent = 'Something went wrong. Try again.';
+            btn.disabled = false;
+            btn.textContent = 'Create account';
+        }
+    });
+
+    function showErr(id, field) {
+        document.getElementById(id).classList.add('visible');
+        document.getElementById(field).classList.add('error');
+        document.getElementById(field).addEventListener('input', () => {
+            document.getElementById(id).classList.remove('visible');
+            document.getElementById(field).classList.remove('error');
+        }, { once: true });
+    }
+</script>
+</body>
+</html>

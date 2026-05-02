@@ -14,6 +14,6 @@ public class JoinInitiative implements ActionCommand {
     }
     @Override
     public void execute() {
-
+        initiative.getParticipants().add(user);
     }
 }
