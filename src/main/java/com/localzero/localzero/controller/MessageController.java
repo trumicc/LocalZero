@@ -18,7 +18,9 @@ public class MessageController {
     }
 
     @PostMapping
-    public void sendMessage(@RequestBody Message message) {
+    public void sendMessage(@RequestBody Message message, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        message.setSenderId(String.valueOf(userId));
         service.sendMessage(message);
     }
 
