@@ -20,4 +20,9 @@ public class PageController {
     public String register() {
         return "forward:/register.html";
     }
+
+    @GetMapping("/mailbox")
+    public String messages() {
+        return "forward:/messages.html";
+    }
 }

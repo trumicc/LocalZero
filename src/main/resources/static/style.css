@@ -374,3 +374,115 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     .layout { grid-template-columns: 1fr; }
     .sidebar { position: static; }
 }
+
+.nav-icon {
+    width: 40px;
+    height: 45px;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.nav-icon:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.nav-icon-wrapper {
+    position: relative;
+}
+
+.nav-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background: #dc2626;
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.nav-badge.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 300px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 200;
+}
+
+.notif-dropdown.show {
+    display: flex;
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #eee;
+}
+
+.notif-header button {
+    background: none;
+    border: none;
+    color: #40916c;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.notif-list {
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.notif-item:hover {
+    background: #f8f4ef;
+}
+
+.notif-item.unread {
+    font-weight: 600;
+    background: #f0fdf4;
+}
+
+.notif-empty {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* Inbox list */
+.inbox-item {
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    margin-bottom: 0.4rem;
+    transition: background 0.15s;
+    border: 1px solid transparent;
+}
+
+.inbox-item:hover {
+    background: var(--cream);
+    border-color: var(--border);
+}

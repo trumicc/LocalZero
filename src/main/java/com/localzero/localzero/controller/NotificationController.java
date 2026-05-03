@@ -36,4 +36,10 @@ public class NotificationController {
         Long userId = (Long) session.getAttribute("userId");
         return service.getUnread(String.valueOf(userId));
     }
+
+    @PostMapping("/mark-all-read")
+    public void markAllRead(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        service.markAllRead(String.valueOf(userId));
+    }
 }

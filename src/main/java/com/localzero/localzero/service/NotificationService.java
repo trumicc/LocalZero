@@ -27,4 +27,12 @@ public class NotificationService {
         return notificationRepository.findByUserIdAndReadFalse(userId);
     }
 
+    public void markAllRead(String userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdAndReadFalse(userId);
+        for (Notification n : notifications) {
+            n.setRead(true);
+        }
+        notificationRepository.saveAll(notifications);
+    }
+
 }

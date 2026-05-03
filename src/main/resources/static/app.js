@@ -8,8 +8,11 @@ let activeFilter = '';
 async function init() {
     await loadCurrentUser();
     await loadInitiatives();
+    await loadNotifications();
     setupFilters();
 }
+
+loadNotifications();
 
 async function loadCurrentUser() {
     try {
@@ -180,6 +183,105 @@ function formatDate(d) {
     if (!d) return '';
     return new Date(d).toLocaleDateString('en-SE', { month: 'short', day: 'numeric' });
 }
+
+// Message mailbox
+function goToInbox() {
+    window.location.href = '/messages.html';
+}
+
+//Notification
+function toggleNotifications() {
+    const dropdown = document.getElementById('notif-dropdown');
+    dropdown.classList.toggle('show');
+    renderNotifications();
+}
+
+function renderNotifications() {
+    const list = document.getElementById('notif-list');
+    const empty = document.getElementById('notif-empty');
+
+    list.innerHTML = '';
+
+    if (!notifications.length) {
+        empty.style.display = 'block';
+        return;
+    }
+
+    empty.style.display = 'none';
+
+    notifications.forEach(n => {
+        const div = document.createElement('div');
+        div.className = `notif-item ${n.read ? '' : 'unread'}`;
+        div.textContent = n.text;
+
+        div.onclick = () => openNotification(n.id);
+
+        list.appendChild(div);
+    });
+
+    updateNotifCount();
+}
+
+function openNotification(id) {
+    const notif = notifications.find(n => n.id === id);
+    if (!notif) return;
+
+    notif.read = true;
+
+    renderNotifications();
+
+    // Example navigation (customize this)
+    window.location.href = '/messages';
+}
+
+function markAllRead() {
+    notifications.forEach(n => n.read = true);
+    renderNotifications();
+}
+
+function updateNotifCount() {
+    const count = notifications.filter(n => !n.read).length;
+    const badge = document.getElementById('notif-count');
+
+    if (count === 0) {
+        badge.style.display = 'none';
+    } else {
+        badge.style.display = 'inline-block';
+        badge.textContent = count;
+    }
+}
+
+document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('notif-wrapper');
+    const dropdown = document.getElementById('notif-dropdown');
+
+    if (!wrapper.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+async function loadNotifications() {
+    try {
+        const res = await fetch('/notifications', {
+            credentials: 'include'
+        });
+
+        const notifications = await res.json();
+
+        updateNotifBadge(notifications.length);
+
+    } catch (e) {
+        console.error('Failed to load notifications');
+    }
+
+    function updateNotifBadge(count) {
+        const badge = document.getElementById('notif-count');
+        if (!badge) return;
+        badge.textContent = count;
+        badge.classList.toggle('hidden', count === 0);
+    }
+}
+
 
 // Run
 init();

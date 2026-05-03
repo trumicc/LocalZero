@@ -36,3 +36,6 @@ build/
 *.trace.db
 localzero.mv.db
 localzero.trace.db
+
+### database files ###
+data/
