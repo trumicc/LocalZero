@@ -2,26 +2,31 @@ package com.localzero.localzero.communication;
 
 import com.localzero.localzero.model.Message;
 import com.localzero.localzero.model.Notification;
+import com.localzero.localzero.repository.MessageRepository;
+import com.localzero.localzero.repository.NotificationRepository;
 
 //sending through the hub instead of talking directly to other participants.
 public class UserParticipant extends Participant{
 
+    private final MessageRepository messageRepository;
+    private final NotificationRepository notificationRepository;
 
-    public UserParticipant(String userId, CommunicationHub hub){
+    public UserParticipant(String userId, CommunicationHub hub, MessageRepository messageRepository, NotificationRepository notificationRepository) {
         super(userId, hub);
+        this.messageRepository = messageRepository;
+        this.notificationRepository = notificationRepository;
     }
 
-    public void sendMessage(Message message){
-        getHub().sendMessage(message);
-    }
 
     @Override
     public void receiveMessage(Message message) {
-        System.out.println("User " + getUserId() + " received message: " + message.getContent());
+        message.setDelivered(true);
+        messageRepository.save(message);
     }
 
     @Override
     public void receiveNotification(Notification notification) {
-        System.out.println("User " + getUserId() + " received notification: " + notification.getContent());
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 }

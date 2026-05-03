@@ -5,6 +5,8 @@ import com.localzero.localzero.model.Notification;
 import com.localzero.localzero.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class NotificationService {
 
@@ -15,8 +17,14 @@ public class NotificationService {
         this.hub = hub;
         this.notificationRepository = notificationRepository;
     }
+
     public void notifyUser(Notification notification) {
         notificationRepository.save(notification);
         hub.sendNotification(notification);
     }
+
+    public List<Notification> getUnread(String userId){
+        return notificationRepository.findByUserIdAndReadFalse(userId);
+    }
+
 }

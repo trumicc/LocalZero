@@ -7,6 +7,8 @@ import com.localzero.localzero.model.User;
 import com.localzero.localzero.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MessageService {
 
@@ -22,6 +24,10 @@ public class MessageService {
     public void sendMessage(Message message) {
         messageRepository.save(message);
         hub.sendMessage(message);
+    }
+
+    public List<Message> getInbox(String userId){
+        return messageRepository.findByReceiverId(userId);
     }
 
 }

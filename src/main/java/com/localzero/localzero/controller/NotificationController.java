@@ -3,10 +3,13 @@ package com.localzero.localzero.controller;
 
 import com.localzero.localzero.model.Notification;
 import com.localzero.localzero.service.NotificationService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/notifications")
@@ -19,7 +22,18 @@ public class NotificationController {
     }
 
     @PostMapping
-    public void notify(@RequestBody Notification notification) {
+    public ResponseEntity<?> notify(@RequestBody Notification notification, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if(userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Not logged in"));
+        }
         service.notifyUser(notification);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public List<Notification> getNotifications(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        return service.getUnread(String.valueOf(userId));
     }
 }

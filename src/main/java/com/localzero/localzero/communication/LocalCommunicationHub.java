@@ -2,6 +2,7 @@ package com.localzero.localzero.communication;
 
 import com.localzero.localzero.model.Message;
 import com.localzero.localzero.model.Notification;
+import com.localzero.localzero.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -13,9 +14,15 @@ public class LocalCommunicationHub implements CommunicationHub{
 
     private Map<String, Participant> participants = new HashMap<>();
 
+
     @Override
     public void register(Participant participant) {
         participants.put(participant.getUserId(), participant);
+    }
+
+    @Override
+    public void deregister(String userId) {
+        participants.remove(userId);
     }
 
     @Override

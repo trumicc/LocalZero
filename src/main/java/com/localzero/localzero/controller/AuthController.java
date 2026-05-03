@@ -1,6 +1,8 @@
 package com.localzero.localzero.controller;
 
 import com.localzero.localzero.model.User;
+import com.localzero.localzero.service.ParticipantRegistrationService;
+import com.localzero.localzero.service.ParticipationService;
 import com.localzero.localzero.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -15,9 +17,11 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserService userService;
+    private final ParticipantRegistrationService participantRegistrationService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, ParticipantRegistrationService participantRegistrationService) {
         this.userService = userService;
+        this.participantRegistrationService = participantRegistrationService;
     }
 
     // FR100 + FR103: Register
@@ -56,15 +60,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid password"));
         }
         session.setAttribute("userId", user.getId());
-        return ResponseEntity.ok(Map.of("message", "logged in succesfully"));
+        participantRegistrationService.registerUser(String.valueOf(user.getId()));
+        return ResponseEntity.ok(Map.of("message", "logged in successfully"));
 
     }
 
     // FR102: Logout
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId != null) {
+            participantRegistrationService.deregisterUser(String.valueOf(userId));
+        }
         session.invalidate();
-        return ResponseEntity.ok(Map.of("message", "Logged ot succesfully"));
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
     @GetMapping("/me")
