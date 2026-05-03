@@ -27,7 +27,7 @@ async function loadCurrentUser() {
 async function loadInitiatives() {
     try {
         const res = await fetch('/api/initiatives');
-        if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error('Failed to load initiatives');
         allInitiatives = await res.json();
     } catch {
         // TODO: initiatives will be added here once BlueFlamingPenguin's endpoint is ready
@@ -111,11 +111,12 @@ async function createInitiative() {
     const desc      = document.getElementById('f-desc').value.trim();
     const category  = document.getElementById('f-category').value;
     const location  = document.getElementById('f-location').value.trim();
+    const visibility = document.getElementById('f-visibility').value;
     const startDate = document.getElementById('f-date').value;
 
     if (!title) { showToast('Please enter a title.'); return; }
 
-    const payload = { title, description: desc, category, location, startDate };
+    const payload = { title, description: desc, category, location, visibility, startDate };
 
     try {
         const res = await fetch('/api/initiatives', {
@@ -140,6 +141,7 @@ async function createInitiative() {
 function clearForm() {
     ['f-title', 'f-desc', 'f-location', 'f-date'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f-category').value = '';
+    document.getElementById('f-visibility').value = 'PUBLIC';
 }
 
 // Logout
