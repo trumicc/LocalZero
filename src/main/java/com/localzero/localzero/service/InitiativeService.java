@@ -7,6 +7,7 @@ import com.localzero.localzero.repository.InitiativeRepository;
 import com.localzero.localzero.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,13 +60,19 @@ public class InitiativeService {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        initiative.setCreator_id(creator.getId().intValue());
-        initiative.setStartDate(LocalDateTime.now());
-
         if (initiative.getVisibility() == null) {
             initiative.setVisibility(Visibility.PUBLIC);
         }
 
+        if (initiative.getStartDate() == null) {
+            initiative.setStartDate(LocalDate.now());
+        }
+
+        if (initiative.getLocation() == null || initiative.getLocation().isBlank()) {
+            initiative.setLocation(creator.getLocation());
+        }
+
+        initiative.setCreator_id(creator.getId().intValue());
         return initiativeRepository.save(initiative);
     }
 }
