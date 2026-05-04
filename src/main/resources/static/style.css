@@ -440,3 +440,7 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     font-weight: 700;
     color: var(--green-dark);
 }
+
+.spacer {
+    height: 1rem;
+}
