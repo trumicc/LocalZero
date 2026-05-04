@@ -42,6 +42,12 @@ public class ParticipationService {
         initiativeRepository.save(initiative);
     }
 
+    public void unjoin(Long userId, int initiativeId) {
+        Initiative initiative = initiativeRepository.findById(initiativeId).orElseThrow();
+        initiative.getParticipants().removeIf(participant -> participant.getId().equals(userId));
+        initiativeRepository.save(initiative);
+    }
+
     public void postUpdate(Long userId, String updateContent, int initiativeId) {
         User user = userRepository.findById(userId).orElseThrow();
         Initiative initiative = initiativeRepository.findById(initiativeId).orElseThrow();

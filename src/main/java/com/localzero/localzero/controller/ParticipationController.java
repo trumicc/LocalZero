@@ -31,6 +31,18 @@ public class ParticipationController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/unjoin/{initiativeId}")
+    public ResponseEntity<?> unjoin(@PathVariable int initiativeId, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        }
+
+        participationService.unjoin(userId, initiativeId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/postUpdate")
     public ResponseEntity<?> update(
             @RequestParam int initiativeId,
