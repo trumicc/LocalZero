@@ -11,6 +11,8 @@ import com.localzero.localzero.repository.UpdateRepository;
 import com.localzero.localzero.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class ParticipationService {
     private UserRepository userRepository;
@@ -28,8 +30,16 @@ public class ParticipationService {
     public void join(Long userId, int initiativeId) {
         User user = userRepository.findById(userId).orElseThrow();
         Initiative initiative = initiativeRepository.findById(initiativeId).orElseThrow();
+
+        boolean alreadyJoined = initiative.getParticipants()
+                .stream()
+                .anyMatch(participant -> participant.getId().equals(userId));
+
+        if (alreadyJoined) {return;}
+
         ActionCommand actionCommand = new JoinInitiative(initiative, user);
         actionCommand.execute();
+        initiativeRepository.save(initiative);
     }
 
     public void postUpdate(Long userId, String updateContent, int initiativeId) {
@@ -37,8 +47,12 @@ public class ParticipationService {
         Initiative initiative = initiativeRepository.findById(initiativeId).orElseThrow();
         Update update = new Update();
         update.setContent(updateContent);
+        update.setAuthor(user);
+        update.setCreated_at(LocalDateTime.now());
+        updateRepository.save(update);
         ActionCommand actionCommand = new PostUpdateCommand(initiative, update);
         actionCommand.execute();
+        initiativeRepository.save(initiative);
     }
 
     public void comment(String commentContent, int updateId, Long userId) {
