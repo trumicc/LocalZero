@@ -2,10 +2,15 @@ package com.localzero.localzero.controller;
 
 import com.localzero.localzero.service.ParticipationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/participation")
@@ -14,23 +19,71 @@ public class ParticipationController {
     @Autowired
     private ParticipationService participationService;
 
-    @PostMapping("/join")
-    public void join(@RequestParam int initiativeId, @RequestParam Long userId) {
+    @PostMapping("/join/{initiativeId}")
+    public ResponseEntity<?> join(@PathVariable int initiativeId, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        }
+
         participationService.join(userId, initiativeId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/unjoin/{initiativeId}")
+    public ResponseEntity<?> unjoin(@PathVariable int initiativeId, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        }
+
+        participationService.unjoin(userId, initiativeId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/postUpdate")
-    public void update(@RequestParam int initiativeId, @RequestParam String content, @RequestParam Long userId) {
-        participationService.postUpdate(userId, content, initiativeId);
+    public ResponseEntity<?> update(
+            @RequestParam int initiativeId,
+            @RequestParam String updateContent,
+            HttpSession session
+    ) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        }
+
+        participationService.postUpdate(userId, updateContent, initiativeId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/comment")
-    public void comment(@RequestParam int updateId, @RequestParam String content, @RequestParam Long userId) {
-        participationService.comment(content, updateId, userId);
+    public ResponseEntity<?> comment(
+            @RequestParam int updateId,
+            @RequestParam String commentContent,
+            HttpSession session
+    ) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        }
+
+        participationService.comment(commentContent, updateId, userId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/like")
-    public void like(@RequestParam int updateId, @RequestParam Long userId) {
+    public ResponseEntity<?> like(@RequestParam int updateId, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        }
+
         participationService.like(updateId, userId);
+        return ResponseEntity.ok().build();
     }
 }

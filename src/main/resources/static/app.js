@@ -60,6 +60,7 @@ function renderInitiatives() {
         const card = document.createElement('div');
         card.className = 'initiative-card';
         card.style.animationDelay = `${idx * 0.06}s`;
+        const joined = (item.participants || []).some(user => user.id === currentUser.id);
         card.innerHTML = `
             <div class="initiative-card-header">
                 <div class="initiative-title">${escHtml(item.title)}</div>
@@ -71,9 +72,9 @@ function renderInitiatives() {
                     <span>${escHtml(item.location || 'Malmö')}</span>
                     ${item.startDate ? `<span>${formatDate(item.startDate)}</span>` : ''}
                 </div>
-                <button class="btn-join ${item._joined ? 'joined' : ''}"
-                    onclick="joinInitiative(event, ${item.id})">
-                    ${item._joined ? '✓ Joined' : 'Join'}
+                <button class="btn-join ${joined ? 'joined' : ''}"
+                    onclick="toggleJoinInitiative(event, ${item.id}, ${joined})">
+                    ${joined ? '✓ Joined' : 'Join'}
                 </button>
             </div>`;
         card.addEventListener('click', (e) => {
@@ -85,20 +86,19 @@ function renderInitiatives() {
 }
 
 // Join
-async function joinInitiative(e, id) {
+async function toggleJoinInitiative(e, id, joined) {
     e.stopPropagation();
-    const btn = e.target;
-    if (btn.classList.contains('joined')) return;
+    const url = joined
+        ? `/api/participation/unjoin/${id}`
+        : `/api/participation/join/${id}`;
     try {
-        const res = await fetch(`/api/participation/join/${id}`, { method: 'POST' });
+        const res = await fetch(url, { method: 'POST' });
+
         if (res.ok) {
-            const item = allInitiatives.find(i => i.id === id);
-            if (item) item._joined = true;
-            btn.textContent = '✓ Joined';
-            btn.classList.add('joined');
-            showToast('You joined the initiative.');
+            await loadInitiatives();
+            showToast(joined ? 'You left the initiative.' : 'You joined the initiative.');
         } else {
-            showToast('Could not join. Try again.');
+            showToast('Could not update participation.');
         }
     } catch {
         showToast('Network error. Please retry.');

@@ -20,4 +20,7 @@ public class PageController {
     public String register() {
         return "forward:/register.html";
     }
+
+    @GetMapping("/initiative")
+    public String initiative() { return "forward:/initiative.html";}
 }

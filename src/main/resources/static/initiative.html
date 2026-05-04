@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Initiative — LocalZero</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="brand">Local<span>Zero</span></div>
+    <div class="nav-right">
+        <a href="/" class="back-link">⬅</a>
+    </div>
+</nav>
+
+<main class="initiative-page">
+    <section class="initiative-detail-card" id="initiative-details">
+
+        <h1 id="initiative-title">Loading...</h1>
+        <p id="initiative-description"></p>
+
+        <div class="initiative-detail-meta">
+            <div class="meta-box">
+                <div class="meta-label">Category</div>
+                <div class="meta-value" id="initiative-category"></div>
+            </div>
+
+            <div class="meta-box">
+                <div class="meta-label">Location</div>
+                <div class="meta-value" id="initiative-location"></div>
+            </div>
+
+            <div class="meta-box">
+                <div class="meta-label">Start date</div>
+                <div class="meta-value" id="initiative-date"></div>
+            </div>
+
+            <div class="meta-box">
+                <div class="meta-label">Visibility</div>
+                <div class="meta-value" id="initiative-visibility"></div>
+            </div>
+        </div>
+
+        <hr class="detail-divider">
+
+        <section class="participants-section">
+            <div class="spacer"></div>
+            <h2>Participants</h2>
+            <p id="participants-count">Loading...</p>
+            <div id="participants-list"></div>
+        </section>
+
+        <hr class="detail-divider">
+
+        <section class="updates-section">
+            <div class="spacer"></div>
+            <h2>Updates</h2>
+
+            <div class="post-update-box">
+                <textarea id="update-content" placeholder="Post an update..."></textarea>
+                <button class="btn-primary" onclick="postUpdate()">Post update</button>
+            </div>
+
+            <div id="updates-list"></div>
+        </section>
+
+    </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+    let currentInitiativeId = null;
+
+    async function loadInitiativeDetails() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        currentInitiativeId = id;
+
+        if (!id) {
+            showError('No initiative ID found.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/initiatives/${id}`);
+
+            if (!res.ok) {
+                showError('Could not load initiative.');
+                return;
+            }
+
+            const initiative = await res.json();
+
+            document.getElementById('initiative-title').textContent =
+                initiative.title || 'Untitled initiative';
+
+            document.getElementById('initiative-description').textContent =
+                initiative.description || 'No description provided.';
+
+            document.getElementById('initiative-category').textContent =
+                formatCategory(initiative.category);
+
+            document.getElementById('initiative-location').textContent =
+                initiative.location || '—';
+
+            document.getElementById('initiative-date').textContent =
+                initiative.startDate ? formatDate(initiative.startDate) : '—';
+
+            document.getElementById('initiative-visibility').textContent =
+                formatVisibility(initiative.visibility);
+
+            renderParticipants(initiative.participants || []);
+            renderUpdates(initiative.updates || []);
+        } catch {
+            showError('Network error.');
+        }
+    }
+
+    function renderParticipants(participants) {
+        document.getElementById('participants-count').textContent =
+            `${participants.length} participant${participants.length !== 1 ? 's' : ''}`;
+
+        const list = document.getElementById('participants-list');
+
+        if (!participants.length) {
+            list.innerHTML = '<p class="muted-text">No participants yet.</p>';
+            return;
+        }
+
+        list.innerHTML = participants
+            .map(user => `<span class="participant-pill">${escapeHtml(user.name || user.email || 'User')}</span>`)
+            .join('');
+    }
+
+    function renderUpdates(updates) {
+        const list = document.getElementById('updates-list');
+
+        if (!updates.length) {
+            list.innerHTML = '<p class="muted-text">No updates yet.</p>';
+            return;
+        }
+
+        list.innerHTML = updates.map(update => {
+            const created = update.createdAt || update.created_at;
+
+            return `
+                <div class="update-card">
+                    <div class="update-header">
+                        <strong>${escapeHtml(update.author?.name || 'Unknown user')}</strong>
+                        <span>${created ? formatDate(created) : ''}</span>
+                    </div>
+
+                    <p>${escapeHtml(update.content || '')}</p>
+
+                    <div class="update-actions">
+                        <button onclick="likeUpdate(${update.id})">
+                            👍 ${update.likes ? update.likes.length : 0}
+                        </button>
+                    </div>
+
+                    <div class="comments">
+                        ${(update.comments || []).map(comment => `
+                            <div class="comment">
+                                <strong>${escapeHtml(comment.author?.name || 'User')}:</strong>
+                                ${escapeHtml(comment.content)}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="comment-form">
+                        <input type="text" id="comment-${update.id}" placeholder="Write a comment..." />
+                        <button onclick="commentUpdate(${update.id})">Comment</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function postUpdate() {
+        const content = document.getElementById('update-content').value.trim();
+        if (!content) return;
+
+        const res = await fetch('/api/participation/postUpdate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                initiativeId: currentInitiativeId,
+                updateContent: content
+            })
+        });
+
+        if (res.ok) {
+            document.getElementById('update-content').value = '';
+            showToast('Update posted');
+            loadInitiativeDetails();
+        }
+    }
+
+    async function likeUpdate(updateId) {
+        const res = await fetch('/api/participation/like', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ updateId })
+        });
+
+        if (res.ok) loadInitiativeDetails();
+    }
+
+    async function commentUpdate(updateId) {
+        const input = document.getElementById(`comment-${updateId}`);
+        const content = input.value.trim();
+        if (!content) return;
+
+        const res = await fetch('/api/participation/comment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                updateId,
+                commentContent: content
+            })
+        });
+
+        if (res.ok) {
+            input.value = '';
+            loadInitiativeDetails();
+        }
+    }
+
+    function formatDate(date) {
+        return new Date(date).toLocaleDateString('en-SE', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    function formatCategory(cat) {
+        if (!cat) return '—';
+        return cat.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function formatVisibility(vis) {
+        if (!vis) return '—';
+        if (vis === 'PUBLIC') return 'Public';
+        if (vis === 'SPECIFIC') return 'Neighborhood only';
+        return vis;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function showError(message) {
+        document.getElementById('initiative-details').innerHTML = `
+            <h1>Error</h1>
+            <p>${message}</p>
+            <a href="/">← Back to feed</a>
+        `;
+    }
+
+    loadInitiativeDetails();
+</script>
+
+</body>
+</html>

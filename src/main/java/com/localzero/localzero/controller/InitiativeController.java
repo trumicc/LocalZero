@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/initiatives")
@@ -19,11 +20,11 @@ public class InitiativeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Initiative>> getAllInitiatives(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity<?> getAllInitiatives(HttpSession session) {
+        Long userId = getLoggedInUserId(session);
 
         if (userId == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
         }
 
         List<Initiative> initiatives = initiativeService.getVisibleInitiativesForUser(userId);
@@ -31,32 +32,44 @@ public class InitiativeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Initiative> getInitiativeById(
+    public ResponseEntity<?> getInitiativeById(
             @PathVariable int id,
             HttpSession session
     ) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = getLoggedInUserId(session);
 
         if (userId == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
         }
 
-        Initiative initiative = initiativeService.getInitiativeById(id, userId);
-        return ResponseEntity.ok(initiative);
+        try {
+            Initiative initiative = initiativeService.getInitiativeById(id, userId);
+            return ResponseEntity.ok(initiative);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Initiative> createInitiative(
+    public ResponseEntity<?> createInitiative(
             @RequestBody Initiative initiative,
             HttpSession session
     ) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = getLoggedInUserId(session);
 
         if (userId == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
         }
 
-        Initiative savedInitiative = initiativeService.createInitiative(initiative, userId);
-        return ResponseEntity.ok(savedInitiative);
+        try {
+            Initiative savedInitiative = initiativeService.createInitiative(initiative, userId);
+            return ResponseEntity.ok(savedInitiative);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    private Long getLoggedInUserId(HttpSession session) {
+        return (Long) session.getAttribute("userId");
     }
 }
