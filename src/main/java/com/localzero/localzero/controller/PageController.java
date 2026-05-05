@@ -21,6 +21,9 @@ public class PageController {
         return "forward:/register.html";
     }
 
+    @GetMapping("/initiative")
+    public String initiative() { return "forward:/initiative.html";}
+
     @GetMapping("/mailbox")
     public String messages() {
         return "forward:/messages.html";
