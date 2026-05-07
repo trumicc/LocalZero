@@ -17,6 +17,10 @@ public class ParticipationController {
 
     private ParticipationService participationService;
 
+    public ParticipationController(ParticipationService participationService) {
+        this.participationService = participationService;
+    }
+
     @PostMapping("/join/{initiativeId}")
     public ResponseEntity<?> join(@PathVariable int initiativeId, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
