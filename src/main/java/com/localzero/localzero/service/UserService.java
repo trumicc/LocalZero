@@ -27,7 +27,6 @@ public class UserService {
         String passwordHash = passwordEncoder.encode(user.getPasswordHash());
         user.setPasswordHash(passwordHash);
 
-        // map frontend string to enum
         if (user.getRoles().contains(Role.COMMUNITY_ORGANIZER)) {
             user.setRoles(Set.of(Role.COMMUNITY_ORGANIZER));
         } else {

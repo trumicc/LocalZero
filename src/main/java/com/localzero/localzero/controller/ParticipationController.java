@@ -1,7 +1,6 @@
 package com.localzero.localzero.controller;
 
 import com.localzero.localzero.service.ParticipationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +15,6 @@ import java.util.Map;
 @RequestMapping("/api/participation")
 public class ParticipationController {
 
-    @Autowired
     private ParticipationService participationService;
 
     @PostMapping("/join/{initiativeId}")
