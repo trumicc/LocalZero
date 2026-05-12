@@ -16,6 +16,7 @@
     <div class="nav-right">
         <span class="nav-username" id="nav-username">Loading...</span>
         <button class="btn-outline" onclick="logout()">Logout</button>
+        <button class="btn-outline" onclick="openSustainability()">Sustainability</button>
     </div>
 </nav>
 
@@ -102,6 +103,63 @@
                 <div class="skeleton skeleton-line short" style="width:30%"></div>
             </div>
         </div>
+
+        <!-- SUSTAINABILITY TRACKER VIEW -->
+        <section id="sustainability-view" style="display:none;">
+
+            <div class="feed-header">
+                <div class="feed-title">Sustainability Dashboard</div>
+            </div>
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+                    <div class="card-title">Your CO₂ Savings</div>
+                    <div class="big-stat" id="co2-total">0 kg</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Community Total</div>
+                    <div class="big-stat" id="community-total">0 kg</div>
+                </div>
+
+                <div class="card action-card">
+                    <div class="card-title">Log Eco Action</div>
+
+                    <button class="btn-primary eco-btn"
+                            onclick="logAction('BIKED_TO_WORK')">
+                        🚲 Biked to work
+                    </button>
+
+                    <button class="btn-primary eco-btn"
+                            onclick="logAction('COMPOSTED')">
+                        ♻️ Composted
+                    </button>
+
+                    <button class="btn-primary eco-btn"
+                            onclick="logAction('SKIPPED_MEAT')">
+                        🥗 Skipped meat
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Recent Actions</div>
+                    <div id="actions-list"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Leaderboard</div>
+                    <div id="leaderboard"></div>
+                </div>
+
+            </div>
+
+            <button class="btn-outline"
+                    onclick="closeSustainability()">
+                ← Back
+            </button>
+
+        </section>
     </main>
 
 </div>

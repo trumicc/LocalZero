@@ -64,4 +64,14 @@ public class EcoActionController {
     private Long getLoggedInUserId(HttpSession session) {
         return (Long) session.getAttribute("userId");
     }
+
+    @GetMapping("/community-total")
+    public double communityTotal() {
+        return ecoActionService.getCommunityTotal();
+    }
+
+    @GetMapping("/leaderboard")
+    public List<User> leaderboard() {
+        return ecoActionService.getLeaderboard();
+    }
 }

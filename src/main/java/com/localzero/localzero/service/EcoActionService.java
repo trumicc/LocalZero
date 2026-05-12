@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class EcoActionService {
@@ -59,5 +60,26 @@ public class EcoActionService {
 
     public List<EcoAction> getUserActions(User user) {
         return ecoActionRepository.findByUser(user);
+    }
+
+    public double getCommunityTotal() {
+        return ecoActionRepository.findAll()
+                .stream()
+                .mapToDouble(EcoAction::getCarbonSaved)
+                .sum();
+    }
+
+    public List<User> getLeaderboard() {
+        return ecoActionRepository.findAll()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        EcoAction::getUser,
+                        Collectors.summingDouble(EcoAction::getCarbonSaved)
+                ))
+                .entrySet()
+                .stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
     }
 }
