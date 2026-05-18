@@ -182,5 +182,103 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('en-SE', { month: 'short', day: 'numeric' });
 }
 
+function openSustainability() {
+    document.getElementById("initiatives-list").style.display = "none";
+    document.getElementById("sustainability-view").style.display = "block";
+
+    loadSustainabilityData();
+    loadCommunityData();
+}
+
+function closeSustainability() {
+    document.getElementById("sustainability-view").style.display = "none";
+    document.getElementById("initiatives-list").style.display = "block";
+}
+
+async function logAction(type) {
+    await fetch("/api/sustainability/log", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            actionType: type,
+            note: ""
+        })
+    });
+
+    loadSustainabilityData();
+    loadCommunityData();
+}
+
+async function loadSustainabilityData() {
+
+    const totalRes = await fetch("/api/sustainability/my-total");
+    const total = await totalRes.json();
+
+    document.getElementById("co2-total").innerText =
+        total + " kg CO₂ saved";
+
+    const actionsRes = await fetch("/api/sustainability/my-actions");
+    const actions = await actionsRes.json();
+
+    const recentActions = actions
+        .slice()
+        .reverse()
+        .slice(0, 5);
+
+    document.getElementById("actions-list").innerHTML =
+        recentActions.map(a => `
+            <div class="eco-action-item">
+                <div>
+                    <strong>${formatAction(a.actionType)}</strong>
+                    <div class="eco-date">
+                        ${formatDateTime(a.createdAt)}
+                    </div>
+                </div>
+
+                <div class="eco-co2">
+                    +${a.carbonSaved} kg CO₂
+                </div>
+            </div>
+        `).join("");
+}
+
+async function loadCommunityData() {
+
+    const totalRes = await fetch("/api/sustainability/community-total");
+    const total = await totalRes.json();
+    document.getElementById("community-total").innerText =
+        total + " kg CO₂ saved by community";
+
+    const lbRes = await fetch("/api/sustainability/leaderboard");
+    const users = await lbRes.json();
+
+    document.getElementById("leaderboard").innerHTML =
+        users.map((u, index) => `
+            <div>
+                #${index + 1} ${u.name}
+            </div>
+        `).join("");
+}
+
+function formatAction(action) {
+    return action
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function formatDateTime(date) {
+    return new Date(date).toLocaleString("en-SE", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+
+
 // Run
 init();
