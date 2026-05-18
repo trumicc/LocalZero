@@ -82,12 +82,9 @@ public class ParticipationService {
 
         User updateAuthor = update.getAuthor();
         if (updateAuthor != null && !updateAuthor.getId().equals(userId)) {
-            String message = user.getName() + " commented on your update: "
-                    + truncate(commentContent, 60) + "";
+            String message = user.getName() + " commented on your update: " + truncate(commentContent, 60) + "";
             notificationService.notifyUser(buildNotification(
-                    String.valueOf(updateAuthor.getId()),
-                    NotificationType.NEW_COMMENT,
-                    message));
+                    String.valueOf(updateAuthor.getId()), NotificationType.NEW_COMMENT, message));
         }
     }
 
@@ -100,29 +97,23 @@ public class ParticipationService {
 
         User updateAuthor = update.getAuthor();
         if (updateAuthor != null && !updateAuthor.getId().equals(userId)) {
-            String message = user.getName() + " liked your update: "
-                    + truncate(update.getContent(), 60) + "";
-            notificationService.notifyUser(buildNotification(
-                    String.valueOf(updateAuthor.getId()),
-                    NotificationType.LIKE,
-                    message));
+            String message = user.getName() + " liked your update: " + truncate(update.getContent(), 60);
+            notificationService.notifyUser(buildNotification(String.valueOf(
+                    updateAuthor.getId()), NotificationType.LIKE, message));
         }
     }
 
     private List<User> getOtherParticipants(Initiative initiative, Long excludeUserId) {
-        return initiative.getParticipants()
-                .stream()
-                .filter(p -> !p.getId().equals(excludeUserId))
-                .toList();
+        return initiative.getParticipants().stream().filter(p -> !p.getId().equals(excludeUserId)).toList();
     }
 
     private Notification buildNotification(String userId, NotificationType type, String content) {
-        Notification n = new Notification();
-        n.setUserId(userId);
-        n.setType(type);
-        n.setContent(content);
-        n.setRead(false);
-        return n;
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setType(type);
+        notification.setContent(content);
+        notification.setRead(false);
+        return notification;
     }
 
     private String truncate(String text, int max) {
