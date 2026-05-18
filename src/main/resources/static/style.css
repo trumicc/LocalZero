@@ -556,3 +556,22 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     background: var(--cream);
     border-color: var(--border);
 }
+
+.user-results {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.user-result {
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.user-result:hover {
+    background: var(--cream);
+}

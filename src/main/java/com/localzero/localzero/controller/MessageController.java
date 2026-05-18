@@ -1,6 +1,7 @@
 package com.localzero.localzero.controller;
 
 import com.localzero.localzero.model.Message;
+import com.localzero.localzero.repository.UserRepository;
 import com.localzero.localzero.service.MessageService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;

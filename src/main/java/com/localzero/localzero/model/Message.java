@@ -1,14 +1,10 @@
 package com.localzero.localzero.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.Id;
 
 import java.time.LocalDateTime;
 
@@ -32,4 +28,7 @@ public class Message {
     private LocalDateTime timestamp;
 
     private boolean delivered = false;
+
+    @Transient
+    private String receiverEmail;
 }
