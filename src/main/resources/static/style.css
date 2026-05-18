@@ -139,6 +139,7 @@ select {
     background: var(--white);
     transition: border-color 0.2s;
     outline: none;
+    border-color: #2d6a4f;
 }
 input:focus, textarea:focus, select:focus { border-color: var(--green-mid); }
 input.error { border-color: var(--error); }
@@ -178,6 +179,15 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     color: var(--green-light);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+.btn-join {
+    background: #e8f5e9;
+    color: #2d6a4f;
+    border: 1px solid #2d6a4f;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -203,7 +213,28 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     background: #1b4332;
     padding: 0 2rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 1rem;
+}
+
+.feed-title { font-size: 1.3rem; font-weight: bold; color: #2d6a4f; }
+.feed-count { font-size: 0.85rem; color: #666; }
+
+.initiatives-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* Initiative card */
+.initiative-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    cursor: pointer;
+}
+.initiative-card:hover { border-color: #2d6a4f; }
+
+.initiative-card-header {
+    display: flex;
     justify-content: space-between;
     height: 64px;
     position: sticky;
@@ -253,6 +284,7 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     color: var(--green-dark);
     margin-bottom: 1.1rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
 }
@@ -385,6 +417,7 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     .layout { grid-template-columns: 1fr; }
     .sidebar { position: static; }
 }
+#toast.show { opacity: 1; }
 
 /* ── Initiative detail page ─────────────────────────────────── */
 
@@ -427,7 +460,31 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     background: var(--cream);
     border-radius: var(--radius-sm);
     padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: white;
 }
+
+.update-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.update-actions { margin: 0.5rem 0; }
+.update-actions button {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.update-actions button:hover { border-color: #2d6a4f; color: #2d6a4f; }
+
+.comments { margin-top: 0.75rem; padding-left: 0.75rem; border-left: 2px solid #eee; }
+.comment { font-size: 0.85rem; margin-bottom: 0.4rem; color: #444; }
 
 .meta-label {
     font-size: 0.75rem;
