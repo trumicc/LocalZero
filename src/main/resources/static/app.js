@@ -32,9 +32,10 @@ async function loadInitiatives() {
         const res = await fetch('/api/initiatives');
         if (!res.ok) throw new Error('Failed to load initiatives');
         allInitiatives = await res.json();
-    } catch {
-        // TODO: initiatives will be added here once BlueFlamingPenguin's endpoint is ready
+    } catch (err) {
+        console.error('Could not load initiatives:', err);
         allInitiatives = [];
+        showToast('Could not load initiatives. Please refresh.');
     }
     renderInitiatives();
 }
