@@ -1,8 +1,6 @@
 package com.localzero.localzero.service;
 
-import com.localzero.localzero.model.Initiative;
-import com.localzero.localzero.model.User;
-import com.localzero.localzero.model.Visibility;
+import com.localzero.localzero.model.*;
 import com.localzero.localzero.repository.InitiativeRepository;
 import com.localzero.localzero.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -15,13 +13,16 @@ public class InitiativeService {
 
     private final InitiativeRepository initiativeRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public InitiativeService(
             InitiativeRepository initiativeRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            NotificationService notificationService
     ) {
         this.initiativeRepository = initiativeRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public List<Initiative> getVisibleInitiativesForUser(Long userId) {
@@ -74,8 +75,11 @@ public class InitiativeService {
         }
 
         initiative.setCreator_id(creator.getId().intValue());
+        Initiative newInitiative = initiativeRepository.save(initiative);
 
-        return initiativeRepository.save(initiative);
+        notifyRelevantUsers(newInitiative, creator);
+
+        return newInitiative;
     }
 
     private User getUserById(Long userId) {
@@ -96,4 +100,19 @@ public class InitiativeService {
 
         return false;
     }
+
+    private void notifyRelevantUsers(Initiative initiative, User creator) {
+        String message = creator.getName() + " started a new initiative: " + initiative.getTitle() + "";
+
+        userRepository.findAll().stream().filter(user -> !user.getId().equals(creator.getId()))
+            .filter(user -> isVisibleToUser(initiative, user)).forEach(u -> {
+                Notification n = new Notification();
+                n.setUserId(String.valueOf(u.getId()));
+                n.setType(NotificationType.JOIN_INITIATIVE);
+                n.setContent(message);
+                n.setRead(false);
+                notificationService.notifyUser(n);
+            });
+    }
+
 }

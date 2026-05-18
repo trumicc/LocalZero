@@ -1,10 +1,7 @@
 package com.localzero.localzero.service;
 
 import com.localzero.localzero.command.*;
-import com.localzero.localzero.model.Comment;
-import com.localzero.localzero.model.Initiative;
-import com.localzero.localzero.model.Update;
-import com.localzero.localzero.model.User;
+import com.localzero.localzero.model.*;
 import com.localzero.localzero.repository.CommentRepository;
 import com.localzero.localzero.repository.InitiativeRepository;
 import com.localzero.localzero.repository.UpdateRepository;
@@ -12,6 +9,9 @@ import com.localzero.localzero.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static io.micrometer.common.util.StringUtils.truncate;
 
 @Service
 public class ParticipationService {
@@ -19,12 +19,14 @@ public class ParticipationService {
     private InitiativeRepository initiativeRepository;
     private CommentRepository commentRepository;
     private UpdateRepository updateRepository;
+    private final NotificationService notificationService;
 
-    public ParticipationService(UserRepository ur, InitiativeRepository ir, CommentRepository cr, UpdateRepository upr) {
+    public ParticipationService(UserRepository ur, InitiativeRepository ir, CommentRepository cr, UpdateRepository upr, NotificationService notificationService) {
         this.userRepository = ur;
         this.initiativeRepository = ir;
         this.commentRepository = cr;
         this.updateRepository = upr;
+        this.notificationService = notificationService;
     }
 
     public void join(Long userId, int initiativeId) {
@@ -59,6 +61,12 @@ public class ParticipationService {
         ActionCommand actionCommand = new PostUpdateCommand(initiative, update);
         actionCommand.execute();
         initiativeRepository.save(initiative);
+
+        String message = user.getName() + " posted an update in " + initiative.getTitle() + ": " + truncate(updateContent, 60);
+
+        getOtherParticipants(initiative, userId).forEach(recipient ->
+                notificationService.notifyUser(buildNotification(
+                        String.valueOf(recipient.getId()), NotificationType.NEW_UPDATE, message)));
     }
 
     public void comment(String commentContent, int updateId, Long userId) {
@@ -71,6 +79,16 @@ public class ParticipationService {
         ActionCommand actionCommand = new CommentUpdateCommand(update, comment);
         actionCommand.execute();
         updateRepository.save(update);
+
+        User updateAuthor = update.getAuthor();
+        if (updateAuthor != null && !updateAuthor.getId().equals(userId)) {
+            String message = user.getName() + " commented on your update: "
+                    + truncate(commentContent, 60) + "";
+            notificationService.notifyUser(buildNotification(
+                    String.valueOf(updateAuthor.getId()),
+                    NotificationType.NEW_COMMENT,
+                    message));
+        }
     }
 
     public void like(int updateId, Long userId) {
@@ -79,5 +97,36 @@ public class ParticipationService {
         ActionCommand actionCommand = new LikeUpdateCommand(update, user);
         actionCommand.execute();
         updateRepository.save(update);
+
+        User updateAuthor = update.getAuthor();
+        if (updateAuthor != null && !updateAuthor.getId().equals(userId)) {
+            String message = user.getName() + " liked your update: "
+                    + truncate(update.getContent(), 60) + "";
+            notificationService.notifyUser(buildNotification(
+                    String.valueOf(updateAuthor.getId()),
+                    NotificationType.LIKE,
+                    message));
+        }
+    }
+
+    private List<User> getOtherParticipants(Initiative initiative, Long excludeUserId) {
+        return initiative.getParticipants()
+                .stream()
+                .filter(p -> !p.getId().equals(excludeUserId))
+                .toList();
+    }
+
+    private Notification buildNotification(String userId, NotificationType type, String content) {
+        Notification n = new Notification();
+        n.setUserId(userId);
+        n.setType(type);
+        n.setContent(content);
+        n.setRead(false);
+        return n;
+    }
+
+    private String truncate(String text, int max) {
+        if (text == null) return "";
+        return text.length() <= max ? text : text.substring(0, max) + "…";
     }
 }

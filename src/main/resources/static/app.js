@@ -3,6 +3,7 @@
 let currentUser = null;
 let allInitiatives = [];
 let activeFilter = '';
+let notifications = [];
 
 // Bootstrap
 async function init() {
@@ -11,8 +12,6 @@ async function init() {
     await loadNotifications();
     setupFilters();
 }
-
-loadNotifications();
 
 async function loadCurrentUser() {
     try {
@@ -26,7 +25,7 @@ async function loadCurrentUser() {
     }
 }
 
-// Initiatives
+// ___Initiatives___________________________________________________________________________________________________
 async function loadInitiatives() {
     try {
         const res = await fetch('/api/initiatives');
@@ -148,13 +147,13 @@ function clearForm() {
     document.getElementById('f-visibility').value = 'PUBLIC';
 }
 
-// Logout
+//___AUTH_______________________________________________________________________________________________________________
 async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.href = '/login';
 }
 
-// Filters
+//___Filters____________________________________________________________________________________________________________
 function setupFilters() {
     document.getElementById('filter-tags').addEventListener('click', (e) => {
         const tag = e.target.closest('.tag');
@@ -166,7 +165,7 @@ function setupFilters() {
     });
 }
 
-// Helpers
+//___Helpers____________________________________________________________________________________________________________
 function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -185,14 +184,29 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('en-SE', { month: 'short', day: 'numeric' });
 }
 
-// Message mailbox
+//___Message mailbox____________________________________________________________________________________________________
 function goToInbox() {
     window.location.href = '/messages.html';
 }
 
-//Notification
+// ___Notification______________________________________________________________________________________________________
+async function loadNotifications() {
+    try {
+        const res = await fetch('/notifications', { credentials: 'include' });
+        if (!res.ok) return;
+        notifications = await res.json();
+        updateNotifBadge();
+    } catch (e) {
+        console.error('Failed to load notifications', e);
+    }
+}
+
 function toggleNotifications() {
     const dropdown = document.getElementById('notif-dropdown');
+    const isOpen = dropdown.classList.contains('show');
+    if(!isOpen){
+        loadNotifications().then(renderNotifications);
+    }
     dropdown.classList.toggle('show');
     renderNotifications();
 }
@@ -201,56 +215,74 @@ function renderNotifications() {
     const list = document.getElementById('notif-list');
     const empty = document.getElementById('notif-empty');
 
-    list.innerHTML = '';
-
     if (!notifications.length) {
+        list.innerHTML = '';
         empty.style.display = 'block';
         return;
     }
 
     empty.style.display = 'none';
-
-    notifications.forEach(n => {
-        const div = document.createElement('div');
-        div.className = `notif-item ${n.read ? '' : 'unread'}`;
-        div.textContent = n.text;
-
-        div.onclick = () => openNotification(n.id);
-
-        list.appendChild(div);
-    });
-
-    updateNotifCount();
+    list.innerHTML = notifications.map(n =>`
+        <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick('${n.id}', '${n.type}')">
+            <span class="notif-type-icon">${notifIcon(n.type)}</span>
+            ${escHtml(n.content)}
+        </div>
+    `).join('');
 }
 
-function openNotification(id) {
-    const notif = notifications.find(n => n.id === id);
-    if (!notif) return;
-
-    notif.read = true;
-
-    renderNotifications();
-
-    // Example navigation (customize this)
-    window.location.href = '/messages';
+function notifIcon(type){
+    const icons = {
+        NEW_MESSAGE:    '✉️',
+        NEW_UPDATE:     '📢',
+        NEW_COMMENT:    '💬',
+        LIKE:           '👍',
+        JOIN_INITIATIVE:'🌱',
+    };
+    return icons[type] || '🔔';
 }
 
-function markAllRead() {
-    notifications.forEach(n => n.read = true);
-    renderNotifications();
-}
+async function handleNotifClick(id, type) {
+    // Mark all as read on click (simple UX — can be made per-item)
+    await markAllRead();
 
-function updateNotifCount() {
-    const count = notifications.filter(n => !n.read).length;
-    const badge = document.getElementById('notif-count');
-
-    if (count === 0) {
-        badge.style.display = 'none';
+    // Navigate based on type
+    if (type === 'NEW_MESSAGE') {
+        window.location.href = '/mailbox';
     } else {
-        badge.style.display = 'inline-block';
-        badge.textContent = count;
+        window.location.href = '/';
     }
 }
+
+async function markAllRead() {
+    try {
+        await fetch('/notifications/mark-all-read', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        notifications.forEach(n => n.read = true);
+        updateNotifBadge();
+        renderNotifications();
+    } catch (e) {
+        console.error('Failed to mark notifications as read', e);
+    }
+}
+
+function updateNotifBadge() {
+    const unread = notifications.filter(n => !n.read).length;
+    const badge  = document.getElementById('notif-count');
+    if (!badge) return;
+    badge.textContent = unread > 9 ? '9+' : unread;
+    badge.classList.toggle('hidden', unread === 0);
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const wrapper  = document.getElementById('notif-wrapper');
+    const dropdown = document.getElementById('notif-dropdown');
+    if (wrapper && dropdown && !wrapper.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
 
 document.addEventListener('click', (e) => {
     const wrapper = document.getElementById('notif-wrapper');
@@ -260,29 +292,5 @@ document.addEventListener('click', (e) => {
         dropdown.classList.remove('show');
     }
 });
-
-async function loadNotifications() {
-    try {
-        const res = await fetch('/notifications', {
-            credentials: 'include'
-        });
-
-        const notifications = await res.json();
-
-        updateNotifBadge(notifications.length);
-
-    } catch (e) {
-        console.error('Failed to load notifications');
-    }
-
-    function updateNotifBadge(count) {
-        const badge = document.getElementById('notif-count');
-        if (!badge) return;
-        badge.textContent = count;
-        badge.classList.toggle('hidden', count === 0);
-    }
-}
-
-
 // Run
 init();
