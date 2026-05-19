@@ -139,6 +139,7 @@ select {
     background: var(--white);
     transition: border-color 0.2s;
     outline: none;
+    border-color: #2d6a4f;
 }
 input:focus, textarea:focus, select:focus { border-color: var(--green-mid); }
 input.error { border-color: var(--error); }
@@ -178,6 +179,15 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     color: var(--green-light);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+.btn-join {
+    background: #e8f5e9;
+    color: #2d6a4f;
+    border: 1px solid #2d6a4f;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -203,7 +213,28 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     background: #1b4332;
     padding: 0 2rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 1rem;
+}
+
+.feed-title { font-size: 1.3rem; font-weight: bold; color: #2d6a4f; }
+.feed-count { font-size: 0.85rem; color: #666; }
+
+.initiatives-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* Initiative card */
+.initiative-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    cursor: pointer;
+}
+.initiative-card:hover { border-color: #2d6a4f; }
+
+.initiative-card-header {
+    display: flex;
     justify-content: space-between;
     height: 64px;
     position: sticky;
@@ -253,6 +284,7 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     color: var(--green-dark);
     margin-bottom: 1.1rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
 }
@@ -385,6 +417,7 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     .layout { grid-template-columns: 1fr; }
     .sidebar { position: static; }
 }
+#toast.show { opacity: 1; }
 
 /* ── Initiative detail page ─────────────────────────────────── */
 
@@ -427,7 +460,31 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     background: var(--cream);
     border-radius: var(--radius-sm);
     padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: white;
 }
+
+.update-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.update-actions { margin: 0.5rem 0; }
+.update-actions button {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.update-actions button:hover { border-color: #2d6a4f; color: #2d6a4f; }
+
+.comments { margin-top: 0.75rem; padding-left: 0.75rem; border-left: 2px solid #eee; }
+.comment { font-size: 0.85rem; margin-bottom: 0.4rem; color: #444; }
 
 .meta-label {
     font-size: 0.75rem;
@@ -445,247 +502,50 @@ textarea { resize: vertical; min-height: 80px; background: var(--cream); }
     height: 1rem;
 }
 
-.nav-icon {
-    width: 40px;
-    height: 45px;
-    cursor: pointer;
-    opacity: 0.85;
-    transition: transform 0.15s ease, opacity 0.15s ease;
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
 }
 
-.nav-icon:hover {
-    opacity: 1;
-    transform: scale(1.1);
+.big-stat {
+    font-size: 42px;
+    font-weight: 700;
+    margin-top: 10px;
 }
 
-.nav-icon-wrapper {
-    position: relative;
-}
-
-.nav-badge {
-    position: absolute;
-    top: -4px;
-    right: -6px;
-    background: #dc2626;
-    color: white;
-    font-size: 10px;
-    padding: 2px 5px;
-    border-radius: 50px;
-    font-weight: 600;
-    transition: opacity 0.2s ease;
-}
-
-.nav-badge.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.notif-dropdown {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    width: 300px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 200;
-}
-
-.notif-dropdown.show {
-    display: flex;
-}
-
-.notif-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.7rem 1rem;
-    font-size: 0.85rem;
-    border-bottom: 1px solid #eee;
-}
-
-.notif-header button {
-    background: none;
-    border: none;
-    color: #40916c;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.notif-list {
-    max-height: 260px;
-    overflow-y: auto;
-}
-
-.notif-item {
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border-bottom: 1px solid #f1f1f1;
-}
-
-.notif-item:hover {
-    background: #f8f4ef;
-}
-
-.notif-item.unread {
-    font-weight: 600;
-    background: #f0fdf4;
-}
-
-.notif-empty {
-    padding: 1rem;
-    text-align: center;
-    font-size: 0.85rem;
-    color: #6b7280;
-}
-
-/* Inbox list */
-.inbox-item {
-    padding: 0.7rem 0.9rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    margin-bottom: 0.4rem;
-    transition: background 0.15s;
-    border: 1px solid transparent;
-}
-
-.inbox-item:hover {
-    background: var(--cream);
-    border-color: var(--border);
-}
-
-.user-results {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    margin-top: 4px;
-    max-height: 150px;
-    overflow-y: auto;
-}
-
-.user-result {
-    padding: 0.5rem 0.7rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-}
-
-.user-result:hover {
-    background: var(--cream);
-}
-
-/* ── Updates System ───────────────────────────────────────── */
-
-.detail-divider {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 1.5rem 0;
-}
-
-/* Update card */
-.update-card {
-    background: var(--white);
-    border-radius: var(--radius-sm);
-    padding: 1rem;
-    margin-bottom: 0.9rem;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.update-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.6rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.update-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin: 0.7rem 0;
-}
-
-.update-actions button {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.3rem 0.7rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.15s ease;
-}
-
-.update-actions button:hover {
-    border-color: var(--green);
-    color: var(--green);
-    background: var(--green-pale);
-}
-
-/* Comments */
-.comments {
-    margin-top: 0.9rem;
-    padding-left: 0.9rem;
-    border-left: 2px solid var(--border);
-}
-
-.comment {
-    font-size: 0.85rem;
-    margin-bottom: 0.45rem;
-    color: var(--text);
-}
-
-/* Comment form */
-.comment-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.8rem;
-}
-
-.comment-form input {
-    flex: 1;
-}
-
-.comment-form button {
-    background: var(--green);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.45rem 0.85rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-}
-
-.comment-form button:hover {
-    background: var(--green-mid);
-}
-
-/* Participants */
-.participant-pill {
-    display: inline-block;
-    background: var(--green-pale);
-    color: var(--green-dark);
-    border-radius: 50px;
-    padding: 0.25rem 0.7rem;
-    font-size: 0.8rem;
-    margin: 0.2rem;
-    font-weight: 500;
-}
-
-/* Post update box */
-.post-update-box {
-    margin-bottom: 1rem;
-}
-
-.post-update-box textarea {
+.eco-btn {
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 12px;
 }
 
-/* Utility */
-.muted-text {
-    color: var(--text-muted);
-    font-size: 0.85rem;
+.eco-action {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.eco-action:last-child {
+    border-bottom: none;
+}
+
+.eco-type {
+    font-weight: 600;
+}
+
+.eco-meta {
+    opacity: 0.7;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.eco-date {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+.eco-co2 {
+    font-weight: 600;
+    color: #2e7d32;
 }
